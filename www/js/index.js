@@ -27,6 +27,9 @@ var app = {
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
+        //console.log("DID IT");
+        var buttonClicked = document.getElementById("btn");
+        buttonClicked.addEventListener("click", this.getLocation);
     },
     // deviceready Event Handler
     //
@@ -45,5 +48,43 @@ var app = {
         receivedElement.setAttribute('style', 'display:block;');
 
         console.log('Received Event: ' + id);
-    }
+    },
+    
+    getLocation: function(){
+       
+        navigator.geolocation.getCurrentPosition(app.successCallback, app.errorCallback); 
+        
+    },
+							
+
+    successCallback: function(position) {
+        var msg = "You are at latitude = " + position.coords.latitude + 
+                    " longitude = " + position.coords.longitude;
+        alert(msg);
+        var gotGeo = document.getElementById("geo");
+        gotGeo.innerHTML = "You are at latitude = " + position.coords.latitude + " longitude = " + position.coords.longitude;
+      
+        var request = XMLHttpRequest();
+        request.open("GET", "http://open.mapquestapi.com/geocoding/v1/reverse?" + "key=Fmjtd|luur2hurn0%2Cbg%3Do5-9wasly&location=" +
+        position.coords.latitude + "," + position.coords.longitude);
+        
+            request.onreadystatechange = function() {
+                if (request.readyState == 4) {
+                    if (request.status == 200 || request.status == 0) {
+                        var maps = JSON.parse(request.responseText);
+                        console.log(maps.results[0].locations[0].adminArea5);
+                        var gotGeo = document.getElementById("geo");
+                        
+                        gotGeo.innerHTML = maps.results[0].locations[0].adminArea5;
+                    }
+                }
+            },
+        request.send();
+        
+    },
+
+     errorCallback: function(error) {
+      alert(error.code);
+    },
+
 };
